@@ -10,6 +10,7 @@ GROUPS_TO_CRAWL_FROM = ['group id (link or id as number)']
 
 async def main():
     crawler = await Crawler.create(APP_NAME, API_ID, API_HASH, GROUPS_TO_CRAWL_FROM)
+    await crawler.test_client() # Test the TelegramClient connection
     await crawler.start(since_stamp=datetime.utcnow() - relativedelta(days=30))
 
 loop = asyncio.new_event_loop()

@@ -10,20 +10,21 @@ from message_filters.url_channel_link_message_filter import UrlChannelLinkMessag
 from message_filters.text_url_channel_link_message_filter import TextUrlChannelLinkMessageFilter
 from datetime import datetime
 import json
+from asyncio import AbstractEventLoop
 
 class Crawler:
     _DATETIME_FORMAT = "%Y_%m_%d-%I_%M_%S_%p"
 
     def __init__(self, app_name, api_id, api_hash):
         self._client = TelegramClient(app_name, api_id, api_hash)
-        self._filters: List[ReferencedChannelMessageFilter] = [
+        self._filters: list[ReferencedChannelMessageFilter] = [
             ForwardedMessagesMessageFilter(),
             TextUrlChannelLinkMessageFilter(),
             UrlChannelLinkMessageFilter()
         ]
 
     async def init(self, groups_to_crawl: []):
-        await self._client.connect()
+        await self._client.start()
         temp_working_set = { c: await self._get_entity(c) for c in groups_to_crawl }
         self._ids_to_links =  { value.id: key for (key, value)  in temp_working_set.items() if value != None }
         self._to_do = set(self._ids_to_links.keys())

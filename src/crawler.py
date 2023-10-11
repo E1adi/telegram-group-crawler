@@ -1,16 +1,15 @@
 import asyncio
 from telethon import TelegramClient
+from telethon.errors import ChannelPrivateError
 from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
-from pprint import pprint
-from telethon.tl.types import Channel, Chat, Message, MessageEntityUrl, MessageEntityTextUrl
+from telethon.tl.types import Channel
 from message_filters.message_filter_interface import ReferencedChannelMessageFilter
 from message_filters.forwarded_messages_message_filter import ForwardedMessagesMessageFilter
 from message_filters.url_channel_link_message_filter import UrlChannelLinkMessageFilter
 from message_filters.text_url_channel_link_message_filter import TextUrlChannelLinkMessageFilter
 from datetime import datetime
 import json
-from asyncio import AbstractEventLoop
 
 class Crawler:
     _DATETIME_FORMAT = "%Y_%m_%d-%I_%M_%S_%p"
@@ -26,7 +25,7 @@ class Crawler:
     async def init(self, groups_to_crawl: []):
         await self._client.start()
         temp_working_set = { c: await self._get_entity(c) for c in groups_to_crawl }
-        self._ids_to_links =  { value.id: key for (key, value)  in temp_working_set.items() if value != None }
+        self._ids_to_links = { value.id: key for (key, value)  in temp_working_set.items() if value != None }
         self._to_do = set(self._ids_to_links.keys())
         self._done = set()
         self._edges = {}
@@ -49,19 +48,10 @@ class Crawler:
                             self._ids_to_links.update({ref.id: Crawler.get_channel_link(ref)})
                     self._to_do.remove(current.id)
                     self._done.add(current.id)
-
-            print(f'Iteration #{iteration}:')
-            print('To-Do:')
-            pprint(self._to_do)
-            print('Done:')
-            pprint(self._done)
-            print('IdsToLinks')
-            pprint(self._ids_to_links)
-
+            yield iteration, self._to_do.copy(), self._done.copy(), self._ids_to_links.copy()
             iteration = iteration + 1
 
         self._dump_to_output_file(now, since_stamp)
-        print('Done')
 
     def _dump_to_output_file(self, now: datetime, since_stamp: datetime | None):
         actual_since = since_stamp.strftime(Crawler._DATETIME_FORMAT) if since_stamp is not None else 'Begining_Of_Time'
@@ -87,7 +77,7 @@ class Crawler:
     async def _join_channel(self, channel_username: str):
         try:
             await self._client(JoinChannelRequest(channel_username))
-        except telethon.errors.ChannelPrivateError:
+        except ChannelPrivateError:
             await self._client(ImportChatInviteRequest(channel_username))
 
     async def _get_entity(self, id: str | int):

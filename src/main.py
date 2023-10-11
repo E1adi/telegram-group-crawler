@@ -23,6 +23,14 @@ async def main():
         print('IdsToLinks')
         pprint(ids_to_link_map)
 
+    print("Done!!!!")
+
+    print('')
+    print('')
+    print('')
+    print('')
+
+    pprint(crawler.get_results())
 
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)

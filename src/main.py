@@ -1,7 +1,6 @@
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-
-from src.crawler import Crawler
+from crawler import Crawler
 import asyncio
 
 APP_NAME = 'Your app name'

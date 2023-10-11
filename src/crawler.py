@@ -4,10 +4,10 @@ from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
 from pprint import pprint
 from telethon.tl.types import Channel, Chat, Message, MessageEntityUrl, MessageEntityTextUrl
-from src.message_filters.message_filter_interface import ReferencedChannelMessageFilter
-from src.message_filters.forwarded_messages_message_filter import ForwardedMessagesMessageFilter
-from src.message_filters.url_channel_link_message_filter import UrlChannelLinkMessageFilter
-from src.message_filters.text_url_channel_link_message_filter import TextUrlChannelLinkMessageFilter
+from message_filters.message_filter_interface import ReferencedChannelMessageFilter
+from message_filters.forwarded_messages_message_filter import ForwardedMessagesMessageFilter
+from message_filters.url_channel_link_message_filter import UrlChannelLinkMessageFilter
+from message_filters.text_url_channel_link_message_filter import TextUrlChannelLinkMessageFilter
 from datetime import datetime
 import json
 
@@ -95,7 +95,7 @@ class Crawler:
         except ValueError:
             return None
         except Exception as ex:
-            print(f'@@@@@@@@@@@@@@@@@@@@ Exception of type {type(ex)} rose while trying to resolve channe id:{id}, {ex}')
+            print(f'@@@@@@@@@@@@@@@@@@@@ Exception of type {type(ex)} rose while trying to resolve channel id:{id}, {ex}')
             return None
 
     async def _get_referenced_channels(self, channel, since_stamp = None) -> list[Channel]:

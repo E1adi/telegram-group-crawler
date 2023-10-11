@@ -1,4 +1,4 @@
-from src.message_filters.message_filter_interface import ReferencedChannelMessageFilter
+from message_filters.message_filter_interface import ReferencedChannelMessageFilter
 from telethon.tl.types import Message
 
 

@@ -1,6 +1,6 @@
-from src.message_filters.message_filter_interface import ReferencedChannelMessageFilter, Message
 from telethon.tl.types import MessageEntityTextUrl
-from src.message_filters.common import extract_telegram_channel_link
+from message_filters.message_filter_interface import ReferencedChannelMessageFilter, Message
+from message_filters.common import extract_telegram_channel_link
 from py_linq import Enumerable
 
 class TextUrlChannelLinkMessageFilter(ReferencedChannelMessageFilter):

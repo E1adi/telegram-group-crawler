@@ -79,15 +79,23 @@ class Crawler:
 
     async def _join_channel(self, channel: Channel):
         try:
-            await self._client(JoinChannelRequest(get_input_channel(channel)))
+            await self._join_normal_channel(channel)
         except ChannelPrivateError:
-            await self._client(ImportChatInviteRequest(channel.username))
+            await self._join_private_channel(channel.username)
 
-    async def _get_entity(self, id: str | int):
+    async def _get_entity(self, id: str | int, is_second_try: bool = False):
+        if isinstance(id, str) and '/joinchat/' in id:
+            await self._join_private_channel(id)
         try:
             return await self._client.get_entity(id)
         except ValueError:
             return None
+        except ChannelPrivateError:
+            if is_second_try:
+                return None
+
+            await self._join_private_channel(id)
+            return await self._get_entity(id, is_second_try=True)
         except FloodWaitError as flood_wait_error:
             print (f"Reached API rate limit. Sleeping for {flood_wait_error.seconds} seconds")
             await asyncio.sleep(flood_wait_error.seconds * 1000)
@@ -107,6 +115,12 @@ class Crawler:
                     ids.update(new_ids)
 
         return [c async for c in (await self._get_entity(id) for id in ids) if c is not None and not isinstance(c, User) ]
+
+    def _join_normal_channel(self, channel: Channel):
+        return self._client(JoinChannelRequest(get_input_channel(channel)))
+
+    def _join_private_channel(self, channel_username: str):
+        return self._client(ImportChatInviteRequest(channel_username))
 
     def get_results(self) -> list[str]:
         return list(self._ids_to_links.values())

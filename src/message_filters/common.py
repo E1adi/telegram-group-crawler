@@ -1,6 +1,6 @@
 import re
 
-TELEGRAM_CHANNEL_LINK_PATTERN = r'(t\.me/[\w+-]+)'
+TELEGRAM_CHANNEL_LINK_PATTERN = r'(t\.me/(joinchat/)?[\w+-]+)'
 _regex = re.compile(TELEGRAM_CHANNEL_LINK_PATTERN)
 
 def extract_telegram_channel_link(text) -> list[str]:

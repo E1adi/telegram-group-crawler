@@ -4,7 +4,7 @@ from telethon.errors import ChannelPrivateError
 from telethon.errors.rpcerrorlist import FloodWaitError
 from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
-from telethon.tl.types import Channel
+from telethon.tl.types import Channel, User
 from telethon.utils import get_input_channel
 from message_filters.message_filter_interface import ReferencedChannelMessageFilter
 from message_filters.forwarded_messages_message_filter import ForwardedMessagesMessageFilter
@@ -106,7 +106,7 @@ class Crawler:
                     new_ids = filter.extract_ids(m)
                     ids.update(new_ids)
 
-        return [c async for c in (await self._get_entity(id) for id in ids) if c is not None]
+        return [c async for c in (await self._get_entity(id) for id in ids) if c is not None and not isinstance(c, User) ]
 
     def get_results(self) -> list[str]:
         return list(self._ids_to_links.values())

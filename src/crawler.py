@@ -1,4 +1,7 @@
 import asyncio
+
+import telethon.utils
+from asyncio_pool import AioPool
 from telethon import TelegramClient
 from telethon.errors import ChannelPrivateError
 from telethon.errors.rpcerrorlist import FloodWaitError
@@ -36,11 +39,12 @@ class Crawler:
         me = await self._client.get_me()
         print(me.stringify())
 
-    async def start(self, since_stamp: datetime = None):
+    async def start(self, since_stamp: datetime = None, concurrency_level: int = None):
+        pool = AioPool(concurrency_level)
         iteration = 0
         while len(self._to_do) > 0:
             handle_tasks = [self._handle_channel(c, since_stamp) for c in self._to_do.copy()]
-            results = await asyncio.gather(*handle_tasks)
+            results = await pool.map(lambda task: task, handle_tasks)
             for (current, referenced) in results:
                 if current is not None:
                     for ref in referenced:

@@ -14,7 +14,7 @@ async def main():
     await crawler.test_client() # Test the TelegramClient connection
 
     async for (iter, to_do, done, ids_to_link_map) in (
-            crawler.start(since_stamp=datetime.utcnow() - relativedelta(days=3))):
+            crawler.start(since_stamp=datetime.utcnow() - relativedelta(days=30), concurrency_level=8)):
         print(f'Iteration #{iter}:')
         print('To-Do:')
         pprint(to_do)

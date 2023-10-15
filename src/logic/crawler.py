@@ -7,12 +7,14 @@ from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
 from telethon.tl.types import Channel, User
 from telethon.utils import get_input_channel
+from .channel_cache import ChannelCache
 from .message_matchers import IMessageMatcher
 from .message_matchers import ForwardedMessagesMessageMatcher
 from .message_matchers import UrlChannelLinkMessageMatcher
 from .message_matchers import TextUrlChannelLinkMessageMatcher
 from datetime import datetime
 from typing import List, Set, Dict, Optional, Coroutine, AsyncIterable, Tuple
+from .utils import get_channel_link
 
 
 class Crawler:
@@ -20,7 +22,7 @@ class Crawler:
 
     def __init__(self, app_name, api_id, api_hash):
         self._client = TelegramClient(app_name, api_id, api_hash)
-        self.last_run_results: Set[str] = set()
+        self.channel_cache = ChannelCache()
         self._matchers: List[IMessageMatcher] = [
             ForwardedMessagesMessageMatcher(),
             TextUrlChannelLinkMessageMatcher(),
@@ -56,7 +58,7 @@ class Crawler:
                     for ref in referenced:
                         if current.id != ref.id and ref.id not in ids_to_links_map.keys():
                             to_do.add(ref.id)
-                            ids_to_links_map.update({ref.id: Crawler.get_channel_link(ref)})
+                            ids_to_links_map.update({ref.id: get_channel_link(ref)})
                     to_do.remove(current.id)
                     done.add(current.id)
 
@@ -90,11 +92,21 @@ class Crawler:
             await self._join_private_channel(channel.username)
 
     async def _get_entity(self, channel_id: str | int, is_second_try: bool = False) -> Optional[Channel]:
+        cached = self.channel_cache[channel_id]
+        if cached is not None:
+            return cached
+
         # noinspection SpellCheckingInspection
         if isinstance(channel_id, str) and '/joinchat/' in channel_id:
             await self._join_private_channel(channel_id)
         try:
-            return await self._client.get_entity(channel_id)
+            result = await self._client.get_entity(channel_id)
+            if result is not None and isinstance(result, Channel):
+                self.channel_cache.add(result)
+                return result
+            else:
+                return None
+
         except ValueError:
             return None
         except ChannelPrivateError:
@@ -105,7 +117,7 @@ class Crawler:
             return await self._get_entity(channel_id, is_second_try=True)
         except FloodWaitError as flood_wait_error:
             print (f"Reached API rate limit. Sleeping for {flood_wait_error.seconds} seconds")
-            await asyncio.sleep(flood_wait_error.seconds * 1000)
+            await asyncio.sleep(flood_wait_error.seconds)
             return await self._get_entity(channel_id)
         except Exception as ex:
             print(f'[--@]: {type(ex)} rose while trying to resolve channel id:{channel_id}, {ex}')
@@ -131,6 +143,4 @@ class Crawler:
     def __del__(self):
         self._client.disconnect()
 
-    @classmethod
-    def get_channel_link(cls, channel: Channel):
-        return f't.me/{channel.username}'
+

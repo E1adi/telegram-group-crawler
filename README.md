@@ -1,13 +1,24 @@
 # telegram-group-crawler
 
-This Crawler, built for telegram, starts at a given list of groups and crawl out from there to any other group/channel that were referenced whether by a direct link or by a message that was forward from other groups/channels.
-You can also specify how far it will look for in each group/channel in term of a datetime object.
+This Crawler, built for telegram, starts at a given list of groups and crawls out from there to any other groups/channels that were referenced whether by a direct link or by a message that was forwarded from other groups/channels.
 
-You need to change the telegram credentials on main.py file in order to get started. In order to create telegram credentials, go to [my.telegram.org](https://my.telegram.org/).
+** For the creds file, go to [my.telegram.org](https://my.telegram.org/), log in, and then create a new app in `API development tools`. </br>
+After creating the app, you would have the needed params;
+* app_name
+* api_id
+* api_name
 
-The results are written to a file as a json list composed of links to join the groups that the crawler have found.
 
-Usage:
+---------------------------------------------------------------------------------------------------------------------
+
+
+
+**Requirements:**
+
+* Python 3.11 +
+* For packages: run the following command `pip install -r requirements.txt`
+
+**Usage:**
 
 `python -m tele_crawl [Options]`
 * Pay attention for required options; --creds and either --group or --groups-file or both

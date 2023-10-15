@@ -3,3 +3,4 @@ prettyprint>=0.1.5
 py-linq>=1.4.0
 python-dateutil>=2.8.2
 Telethon>=1.30.3
+typer>=0.9.0

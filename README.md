@@ -12,6 +12,7 @@ Usage:
 `python -m tele_crawl [Options]`
 * Pay attention for required options; --creds and either --group or --groups-file or both
 
+```
 Usage: tele_crawl.py [OPTIONS]
 
 Options:
@@ -36,4 +37,4 @@ Options:
   -o, --output PATH               Path for an output file contains a JSON list
                                   of all found groups
   --help                          Show this message and exit.
-
+```
